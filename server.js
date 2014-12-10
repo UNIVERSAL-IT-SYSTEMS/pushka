@@ -1,14 +1,20 @@
 'use strict';
 
-var WebSocketServer = require('ws').Server,
-    // fs = require('fs'),
-    // util = require('util'),
+var http = require('http'),
+    ws = require('ws'),
+    connect = require('connect'),
+    serveStatic = require('serve-static'),
     Tail = require('tail').Tail;
 
-var wss, name;
+var wss, name, app, server;
+
+app = connect();
+app.use(serveStatic('./public', {'index': ['index.html', 'index.htm']}));
+server = http.createServer(app).listen(8080);
 
 name = 'log.txt';
-wss = new WebSocketServer({port: 8080});
+
+wss = new ws.Server({server: server});
 
 wss.on('connection', function (ws) {
     var tail; // readStream
@@ -26,22 +32,4 @@ wss.on('connection', function (ws) {
     tail.on('error', function (err) {
         console.log('ERROR: ', err);
     });
-    // readStream = fs.createReadStream(name);
-    // readStream.on('data', function (chunk) {
-    //     ws.send('chunk:' + chunk);
-    // });
-    // readStream.on('end', function () {
-    //     console.log('EOF');
-    // });
-    // fs.watch(name, function (event, filename) {
-    //     fs.stat(name, function (err, stats) {
-    //         if (err) { throw new Error(); }
-    //         console.log(
-    //             'event is: ' + event,
-    //             'filename:' + filename,
-    //             'size:' + JSON.parse(util.inspect(stats)).size
-    //         );
-    //         ws.send('size:' + util.inspect(stats));
-    //     });
-    // });
 });
