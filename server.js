@@ -32,4 +32,9 @@ wss.on('connection', function (ws) {
     tail.on('error', function (err) {
         console.log('ERROR: ', err);
     });
+
+    ws.on('close', function () {
+        tail.unwatch();
+        console.log('disconnected');
+    });
 });
